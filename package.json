@@ -1,0 +1,38 @@
+{
+  "name": "auto-translation",
+  "version": "1.0.0",
+  "description": "Automatically extract translation keys from React components and generate i18n files",
+  "main": "index.js",
+  "type": "commonjs",
+  "bin": {
+    "auto-translation": "./index.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "react",
+    "i18n",
+    "translation",
+    "internationalization",
+    "automation"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^5.6.0",
+    "i18next": "^25.3.6",
+    "react-i18next": "^15.6.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "files": [
+    "index.js",
+    "config",
+    "utils",
+    "setup",
+    "scanners",
+    "README.md"
+  ]
+}

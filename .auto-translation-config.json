@@ -1,0 +1,11 @@
+{
+  "i18nPath": "I:\\language-npmpackage\\i18n",
+  "jsonFilesPath": "I:\\language-npmpackage\\i18n\\localization",
+  "locationChoice": "2",
+  "structureType": "file-based",
+  "currentFile": "filters",
+  "files": [
+    "agents",
+    "filters"
+  ]
+}
