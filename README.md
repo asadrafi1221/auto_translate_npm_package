@@ -6,6 +6,7 @@ Hi, I'm the creator of this tool 👋
 Why I built this? Because I was tired of spending hours manually setting up i18n in every project, hunting down hardcoded strings, and wrapping them one by one. Sound familiar?
 I've been there - staring at a codebase with hundreds of hardcoded strings, knowing I need to internationalize it, but dreading the tedious manual work ahead. That's when I decided: "There has to be a better way."
 The Problem I Solved
+
 Picture this: You're working on a project and suddenly realize you need to support multiple languages. You think "How hard can it be?"
 Then reality hits:
 
@@ -181,3 +182,4 @@ Made with ❤️ by a developer who believes in automation
 email  : asadrafi1221@gmail.com
 License
 MIT - Because good tools should be free for everyone to use and improve.
+i am still working on it if somebody catches up that would be Great
