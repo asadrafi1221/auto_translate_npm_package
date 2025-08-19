@@ -1,6 +1,6 @@
 {
   "name": "auto-translation",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Automatically extract translation keys from React components and wrap them with translation funtion and generate i18n files",
   "main": "index.js",
   "type": "commonjs",
