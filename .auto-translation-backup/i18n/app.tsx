@@ -1,14 +1,12 @@
-import { useTranslation } from "@/libs/hooks";
-import React from "react";
+import React from 'react'
 
 function app() {
-  const { t } = useTranslation();
   return (
     <div>
-      <p>filters is here</p>
-      <p>{t("heo")}</p>
+        <p>january</p>
+        <li>feb</li>
     </div>
-  );
+  )
 }
 
-export default app;
+export default app

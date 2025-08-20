@@ -3,9 +3,8 @@
   "jsonFilesPath": "I:\\language-npmpackage\\i18n\\localization",
   "locationChoice": "2",
   "structureType": "file-based",
-  "currentFile": "filters",
+  "currentFile": "agents",
   "files": [
-    "agents",
-    "filters"
+    "agents"
   ]
 }
