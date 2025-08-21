@@ -1,8 +1,9 @@
+#!/usr/bin/env node
+
 const fs = require("fs");
 const path = require("path");
 const readline = require("readline");
 const { askQuestion } = require("./cli.commands.js");
-
 
 const createDirectory = (dirPath) => {
   if (!fs.existsSync(dirPath)) {

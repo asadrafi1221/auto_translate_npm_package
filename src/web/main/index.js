@@ -1,3 +1,6 @@
+#!/usr/bin/env node
+
+
 const {
   showUsage,
   showImportAlert,
@@ -11,6 +14,8 @@ const {
 const reactMain = async () => {
   const args = process.argv.slice(2);
   const command = args[0];
+
+
 
 
   try {

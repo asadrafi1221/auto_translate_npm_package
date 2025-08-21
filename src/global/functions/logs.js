@@ -1,46 +1,27 @@
-const starter = () => {
-  const title = "🚀 AUTO TRANSLATION TOOL 🚀";
-  const description = "Automatically extract and manage React i18n keys";
-  const features = ["⚡ Fast", "🔒 Secure", "🎯 Accurate"];
-  const commands = [
-    { cmd: "react", desc: "Run the tool for React projects " },
-    { cmd: "react-native", desc: "Run the tool for React Native projects --upcoming feature" },
-    { cmd: "node", desc: "Run the tool for Node projects --upcoming feature" },
- 
-  ];
+#!/usr/bin/env node
+const inquirer = require("inquirer").default;
 
-  // Calculate max width dynamically
-  const allLines = [
-    title,
-    description,
-    features.join(" | "),
-    ...commands.map(c => `${c.cmd.padEnd(15)} - ${c.desc}`),
-  ];
-  const maxWidth = Math.max(...allLines.map(line => line.length)) + 4; // padding
+async function starter() {
+  console.clear();
+  console.log("🚀 AUTO TRANSLATION TOOL 🚀\n");
+  console.log("Automatically extract and manage i18n keys\n");
+  console.log("⚡ Fast | 🔒 Secure | 🎯 Accurate\n");
+  console.log("⚠️  Once you ignite a mode, it cannot be undone in this project!\n");
 
-  const line = "═".repeat(maxWidth);
-  const emptyLine = "║" + " ".repeat(maxWidth - 2) + "║";
+  const { mode } = await inquirer.prompt([
+    {
+      type: "list",
+      name: "mode",
+      message: "Select project mode to ignite:",
+      choices: [
+        { name: "🔥 React (availible)", value: "ignite-react" },
+        { name: "📱 React Native (upcoming)  ", value: "ignite-rn" },
+        { name: "⚙️ Node / Backend (upcoming) ", value: "ignite-node" },
+      ],
+    },
+  ]);
 
-  console.log("\n");
-  console.log(`╔${line}╗`);
-  console.log(emptyLine);
-  console.log(`║ ${title.padEnd(maxWidth - 3)}║`);
-  console.log(emptyLine);
-  console.log(`║ ${description.padEnd(maxWidth - 3)}║`);
-  console.log(emptyLine);
-  console.log(`║ ${features.join(" | ").padEnd(maxWidth - 3)}║`);
-  console.log(emptyLine);
-  console.log(`╠${line}╣`);
-  console.log(`║ Commands:${" ".repeat(maxWidth - 11)}║`);
-  commands.forEach(c => {
-    const lineText = `${c.cmd.padEnd(15)} - ${c.desc}`;
-    console.log(`║ ${lineText.padEnd(maxWidth - 3)}║`);
-  });
-  console.log(`║${" ".repeat(maxWidth - 2)}║`);
-  console.log(`╚${line}╝\n`);
-};
-
-// Example usage
-module.exports = {
-    starter
+  return mode; 
 }
+
+module.exports = { starter };

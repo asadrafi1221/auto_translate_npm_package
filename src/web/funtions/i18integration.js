@@ -1,18 +1,36 @@
 const fs = require("fs");
 const path = require("path");
-const { askQuestion } = require("./cli.commands.js");
-const { writeFile, createDirectory } = require("./handlefile.js");
+const inquirer = require("inquirer").default;
 
+const createDirectory = (dirPath) => {
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+    console.log(`📁 Created directory: ${dirPath}`);
+  }
+};
+
+const writeFile = (filePath, content) => {
+  if (!fs.existsSync(filePath)) {
+    fs.writeFileSync(filePath, content, "utf8");
+    console.log(`📄 Created file: ${filePath}`);
+  }
+};
 
 const setupI18nStructure = async () => {
   console.log("🌍 Setting up i18n structure...\n");
 
   // Ask user where to create i18n folder
-  console.log("Where would you like to create the i18n folder?");
-  console.log("1. Inside src/ directory (src/i18n/)");
-  console.log("2. In current/root directory (./i18n/)");
-
-  const locationChoice = await askQuestion("\nEnter your choice (1 or 2): ");
+  const { locationChoice } = await inquirer.prompt([
+    {
+      type: "list",
+      name: "locationChoice",
+      message: "Where would you like to create the i18n folder?",
+      choices: [
+        { name: "Inside src/ directory (src/i18n/)", value: "1" },
+        { name: "In current/root directory (./i18n/)", value: "2" },
+      ],
+    },
+  ]);
 
   let i18BasePath;
   if (locationChoice === "1") {
@@ -31,11 +49,20 @@ const setupI18nStructure = async () => {
   }
 
   // Ask user about structure type
-  console.log("\nChoose translation structure:");
-  console.log("1. Single file (all translations in one file)");
-  console.log("2. File-based (separate files for different sections)");
-
-  const structureChoice = await askQuestion("\nEnter your choice (1 or 2): ");
+  const { structureChoice } = await inquirer.prompt([
+    {
+      type: "list",
+      name: "structureChoice",
+      message: "Choose translation structure:",
+      choices: [
+        { name: "Single file (all translations in one file)", value: "1" },
+        {
+          name: "File-based (separate files for different sections)",
+          value: "2",
+        },
+      ],
+    },
+  ]);
 
   const i18Path = path.join(i18BasePath, "i18n");
   const jsonFilesPath = path.join(i18Path, "localization");
@@ -49,9 +76,16 @@ const setupI18nStructure = async () => {
     console.log("\n📁 Setting up file-based structure...\n");
 
     // Ask for initial file name
-    const fileName = await askQuestion(
-      "Enter name for your first translation file (e.g., 'commons', 'dashboard'): "
-    );
+    const { fileName } = await inquirer.prompt([
+      {
+        type: "input",
+        name: "fileName",
+        message:
+          "Enter name for your first translation file (e.g., 'commons', 'dashboard'): ",
+        validate: (input) =>
+          input.trim() ? true : "File name cannot be empty",
+      },
+    ]);
     const sanitizedFileName = fileName
       .toLowerCase()
       .replace(/[^a-zA-Z0-9]/g, "");
@@ -192,6 +226,4 @@ export default i18n;
   return i18Path;
 };
 
-module.exports = {
-  setupI18nStructure,
-};
+module.exports = { setupI18nStructure };
