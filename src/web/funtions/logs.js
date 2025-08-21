@@ -9,7 +9,7 @@ const showBanner = () => {
   console.log("║                                                  ║");
   console.log("║           🚀 AUTO TRANSLATION TOOL 🚀            ║");
   console.log("║                                                  ║");
-  console.log("║      Automatically extract React i18n keys      ║");
+  console.log("║      Automatically extract i18n keys      ║");
   console.log("║                                                  ║");
   console.log("╚══════════════════════════════════════════════════╝");
   console.log("\n");
@@ -21,7 +21,7 @@ const showImportAlert = (i18nPath) => {
   console.log("│                  ⚠️  IMPORTANT ⚠️                  │");
   console.log("└──────────────────────────────────────────────────┘");
   console.log("");
-  console.log("🔧 Don't forget to import i18n in your React layout file!");
+  console.log("🔧 Don't forget to import i18n in your layout file!");
   console.log("");
   console.log("📄 Add this to your layout.js/layout.tsx:");
   console.log("");
@@ -33,7 +33,7 @@ const showImportAlert = (i18nPath) => {
   console.log(`│ import './${importPath}/i18n';                    │`);
   console.log("└────────────────────────────────────────────────┘");
   console.log("");
-  console.log("💡 This ensures React i18n is initialized when your app starts!");
+  console.log("💡 This ensures i18n is initialized when your app starts!");
   console.log("");
 };
 
@@ -43,13 +43,13 @@ const showUsage = () => {
   console.log("└────────────────────────────────────────────────┘");
   console.log("");
   console.log(
-    "  npx auto-translation react-init   # Complete React setup with dependencies"
+    "  npx auto-translation init   # Complete setup with dependencies"
   );
   console.log(
-    "  npx auto-translation react-setup  # Setup React i18n folder structure only"
+    "  npx auto-translation setup  # Setup i18n folder structure only"
   );
   console.log(
-    "  npx auto-translation react-scan   # Scan React files for translation keys"
+    "  npx auto-translation scan   # Scan files for translation keys"
   );
 
   console.log("");
@@ -58,21 +58,22 @@ const showUsage = () => {
   console.log("└────────────────────────────────────────────────┘");
   console.log("");
   console.log(
-    "  react-init        - Creates sample files + React i18n structure + installs deps"
+    "  init        - Creates sample files react + i18n structure + installs deps"
   );
   console.log(
-    "  react-setup       - Creates React i18n folder structure only"
+    "  setup       - Creates i18n folder structure only"
   );
   console.log(
-    "  react-scan        - Scans React files and extracts t() translation keys"
+    "  scan        - Scans files and extracts t() translation keys"
   );
   console.log(
-    "  react-wrap        - Wrap all hardcoded text in t() function in JSX elements"
+    "  wrap        - Wrap all hardcoded text in t() function in JSX elements"
   );
   console.log(
-    "  react-file-update - Manage translation files in React file-based structure"
+    "  file-update - Manage translation files in file-based structure"
   );
   console.log("");
+  console.log("ignore-init - Initializes .ignoreKeys file for projects");
 };
 
 module.exports = {

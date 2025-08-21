@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-
 const {
   showUsage,
   showImportAlert,
@@ -9,14 +8,15 @@ const {
   installDependencies,
   scanAndUpdateTranslations,
   wrapPlainTextWithTranslation,
+  initIgnoreKeys,
+  selectFilesToScan,
 } = require("../funtions/index.js");
 
-const reactMain = async () => {
-  const args = process.argv.slice(2);
+const reactMain = async (commandToRun) => {
+  const args = commandToRun ? [commandToRun] : process.argv.slice(2);
   const command = args[0];
 
-
-
+  console.log(`\n🚀 Running command: ${command}\n`);
 
   try {
     switch (command) {
@@ -31,17 +31,28 @@ const reactMain = async () => {
         console.log("📋 Next steps:");
         console.log("1. ✅ Dependencies installed");
         console.log("2. Import i18n config in your layout file (see above)");
-        console.log("3. Run 'npx auto-translation react-scan' to extract translation keys");
-        console.log("");
+        console.log(
+          "3. Run 'npx auto-translation react-scan' to extract translation keys\n"
+        );
         break;
 
       case "react-scan":
         console.log("🔍 Scanning React project for translation keys...\n");
-        await scanAndUpdateTranslations();
+
+        const filesToScan = await selectFilesToScan();
+
+        if (Array.isArray(filesToScan) && filesToScan.length === 0) {
+          console.log("❌ No files to scan. Operation cancelled.");
+          break;
+        }
+
+        await scanAndUpdateTranslations(filesToScan);
         break;
 
       case "react-wrap":
-        console.log("🔄 Wrapping plain text with t() calls in React project...\n");
+        console.log(
+          "🔄 Wrapping plain text with t() calls in React project...\n"
+        );
         await wrapPlainTextWithTranslation();
         break;
 
@@ -53,6 +64,11 @@ const reactMain = async () => {
       case "react-setup":
         console.log("📁 Setting up React folder structure...\n");
         await setupI18nStructure();
+        break;
+
+      case "react-ignore-init":
+        console.log("🚫 Initializing .ignoreKeys...\n");
+        await initIgnoreKeys();
         break;
 
       default:

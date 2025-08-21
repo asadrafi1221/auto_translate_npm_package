@@ -3,6 +3,7 @@ const REACT_MODE_COMMANDS = [
   "react-scan",
   "react-wrap",
   "react-file-update",
+  "react-ignore-init",
   "react-setup",
 ];
 
