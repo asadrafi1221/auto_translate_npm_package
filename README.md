@@ -231,7 +231,7 @@ npx auto-translation wrap
 ```bash
 npx auto-translation file-update
 ```
-**What it does:**
+**What it Does:**
 - 🧹 Removes unused translation keys
 - 🔄 Syncs keys across all language files
 - 📊 Reports translation status

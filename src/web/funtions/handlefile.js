@@ -1,20 +1,43 @@
+#!/usr/bin/env node
+
 const fs = require("fs");
 const path = require("path");
-const { askQuestion } = require('./inputUtils.js');
-const { loadConfig, saveConfig } = require('../config/configManager.js');
-const { writeFile } = require('./fileUtils.js');
+const readline = require("readline");
+const { askQuestion } = require("./cli.commands.js");
+
+const createDirectory = (dirPath) => {
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+    console.log(`📁 Created directory: ${dirPath}`);
+  }
+};
+
+const writeFile = (filePath, content) => {
+  fs.writeFileSync(filePath, content);
+  console.log(`📄 Created file: ${filePath}`);
+};
 
 const manageFiles = async () => {
-  const config = loadConfig();
+  const configPath = path.join(process.cwd(), ".auto-translation-config.json");
 
-  if (!config) {
+  if (!fs.existsSync(configPath)) {
     console.log("❌ No config found! Run 'npx auto-translation init' first.");
+    return;
+  }
+
+  let config;
+  try {
+    config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
+  } catch (error) {
+    console.log("❌ Invalid config file!");
     return;
   }
 
   if (config.structureType !== "file-based") {
     console.log("❌ This command is only for file-based structures!");
-    console.log("💡 Your current structure doesn't support this feature.");
+    console.log(
+      "💡 Your current structure is single-file. Use 'npx auto-translation scan' instead."
+    );
     return;
   }
 
@@ -68,7 +91,9 @@ const updateExistingFile = async (config) => {
   const selectedFile = config.files[fileIndex];
   config.currentFile = selectedFile;
 
-  saveConfig(config);
+  // Save updated config
+  const configPath = path.join(process.cwd(), ".auto-translation-config.json");
+  fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
 
   console.log(`✅ Switched to file: ${selectedFile}`);
   console.log("🔍 Now run 'npx auto-translation scan' to update this file");
@@ -78,13 +103,16 @@ const createNewFile = async (config) => {
   const fileName = await askQuestion("Enter name for new translation file: ");
   const sanitizedFileName = fileName.toLowerCase().replace(/[^a-zA-Z0-9]/g, "");
 
-  if (config.files && config.files.includes(sanitizedFileName)) {
+  if (config.files.includes(sanitizedFileName)) {
     console.log(`❌ File '${sanitizedFileName}' already exists!`);
     return;
   }
 
   // Create the new file
-  const newFilePath = path.join(config.jsonFilesPath, `${sanitizedFileName}.js`);
+  const newFilePath = path.join(
+    config.jsonFilesPath,
+    `${sanitizedFileName}.js`
+  );
   const newFileContent = `export const ${sanitizedFileName} = {
   // Add your ${sanitizedFileName} translations here
 };`;
@@ -92,33 +120,23 @@ const createNewFile = async (config) => {
   writeFile(newFilePath, newFileContent);
 
   // Update index.js
-  await updateIndexFile(config, sanitizedFileName);
-
-  // Update config
-  if (!config.files) config.files = [];
-  config.files.push(sanitizedFileName);
-  config.currentFile = sanitizedFileName;
-
-  saveConfig(config);
-
-  console.log(`✅ Created new file: ${sanitizedFileName}.js`);
-  console.log(`📝 Updated index.js with import`);
-  console.log(`🎯 Switched to new file: ${sanitizedFileName}`);
-};
-
-const updateIndexFile = async (config, newFileName) => {
   const indexPath = path.join(config.jsonFilesPath, "index.js");
-  
-  const importLine = `import { ${newFileName} } from './${newFileName}';`;
-  const spreadLine = `  // ${newFileName.charAt(0).toUpperCase() + newFileName.slice(1)}\n  ...${newFileName},`;
 
+  // Read current index.js
   let indexContent = "";
   if (fs.existsSync(indexPath)) {
     indexContent = fs.readFileSync(indexPath, "utf-8");
   }
 
+  // Add import for new file
+  const importLine = `import { ${sanitizedFileName} } from './${sanitizedFileName}';`;
+  const spreadLine = `  // ${
+    sanitizedFileName.charAt(0).toUpperCase() + sanitizedFileName.slice(1)
+  }\n  ...${sanitizedFileName},`;
+
+  // Update imports section
   if (indexContent.includes("import {")) {
-    // Update existing index.js
+    // Add to existing imports
     const lines = indexContent.split("\n");
     let importInserted = false;
 
@@ -130,8 +148,12 @@ const updateIndexFile = async (config, newFileName) => {
       }
     }
 
-    const enJSONIndex = lines.findIndex((line) => line.includes("const enJSON = {"));
+    // Add to enJSON object
+    const enJSONIndex = lines.findIndex((line) =>
+      line.includes("const enJSON = {")
+    );
     if (enJSONIndex !== -1) {
+      // Find the closing brace
       for (let i = enJSONIndex + 1; i < lines.length; i++) {
         if (lines[i].includes("};")) {
           lines.splice(i, 0, spreadLine);
@@ -153,6 +175,20 @@ export default enJSON;`;
   }
 
   fs.writeFileSync(indexPath, indexContent);
+
+  // Update config
+  config.files.push(sanitizedFileName);
+  config.currentFile = sanitizedFileName;
+
+  const configPath = path.join(process.cwd(), ".auto-translation-config.json");
+  fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+
+  console.log(`✅ Created new file: ${sanitizedFileName}.js`);
+  console.log(`📝 Updated index.js with import`);
+  console.log(`🎯 Switched to new file: ${sanitizedFileName}`);
+  console.log(
+    "🔍 Now run 'npx auto-translation scan' to add keys to this file"
+  );
 };
 
 const switchActiveFile = async (config) => {
@@ -183,9 +219,13 @@ const switchActiveFile = async (config) => {
   }
 
   config.currentFile = selectedFile;
-  saveConfig(config);
+
+  // Save updated config
+  const configPath = path.join(process.cwd(), ".auto-translation-config.json");
+  fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
 
   console.log(`✅ Switched to file: ${selectedFile}`);
+  console.log("🔍 Now run 'npx auto-translation scan' to update this file");
 };
 
 const listAllFiles = (config) => {
@@ -203,12 +243,15 @@ const listAllFiles = (config) => {
   });
 
   console.log(`\n🎯 Current active file: ${config.currentFile}`);
+  console.log("💡 Use 'npx auto-translation scan' to update the current file");
 };
 
 module.exports = {
+  createDirectory,
+  writeFile,
+  listAllFiles,
+  switchActiveFile,
+  createNewFile,
   manageFiles,
   updateExistingFile,
-  createNewFile,
-  switchActiveFile,
-  listAllFiles,
 };
