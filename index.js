@@ -44,7 +44,9 @@ async function askModeMenu(currentMode, strictLocked) {
   if (!strictLocked) {
     choices.splice(1, 0, { name: "🔄 Change mode", value: "change" });
   } else {
-    console.log("🔒 Project is in strict mode. To change modes, manually delete the .mode_lock file.");
+    console.log(
+      "🔒 Project is in strict mode. To change modes, manually delete the .mode_lock file."
+    );
   }
 
   const { action } = await inquirer.prompt([
@@ -61,7 +63,8 @@ async function askModeMenu(currentMode, strictLocked) {
 const runByMode = (mode, command) => {
   if (mode === "react") return reactMain(command);
   if (mode === "rn") return console.log("🚧 React Native support coming soon!");
-  if (mode === "node") return console.log("🚧 Node/Backend support coming soon!");
+  if (mode === "node")
+    return console.log("🚧 Node/Backend support coming soon!");
 };
 
 const main = async () => {
@@ -70,23 +73,23 @@ const main = async () => {
   let currentMode = getMode();
   const strictLocked = isStrictLocked();
 
-  // --- FORCE MODE SELECTION FIRST ---
-  // No commands allowed until mode is chosen
   if (!currentMode) {
     if (command) {
       console.log(`❌ No mode selected! You must choose a project mode first.`);
       console.log(`🚫 Cannot run "${command}" without selecting a mode.`);
-      console.log(`\n📋 Please run the CLI without any commands to select a mode first.\n`);
+      console.log(
+        `\n📋 Please run the CLI without any commands to select a mode first.\n`
+      );
       process.exit(1);
     }
-    
+
     // No command provided and no mode - force mode selection
     console.log(`🎯 Welcome! Please select your project mode:\n`);
     const mode = await starter();
     currentMode = mode.replace("ignite-", "");
     setMode(currentMode);
     console.log(`\n✅ Project set to "${currentMode}" mode!\n`);
-    
+
     // After mode selection, continue to main menu
     return runByMode(currentMode);
   }
@@ -94,22 +97,28 @@ const main = async () => {
   // --- Handle strict commands AFTER mode is confirmed ---
   if (STRICT_COMMANDS.includes(command)) {
     const commandMode = getModeFromStrictCommand(command);
-    
+
     if (currentMode !== commandMode) {
       // Trying to run strict command for different mode
-      console.log(`❌ Project is in "${currentMode}" mode. Cannot run ${command} (${commandMode} command).`);
+      console.log(
+        `❌ Project is in "${currentMode}" mode. Cannot run ${command} (${commandMode} command).`
+      );
       if (strictLocked) {
-        console.log(`💡 To change modes, manually delete the .mode_lock file and restart.`);
+        console.log(
+          `💡 To change modes, manually delete the .mode_lock file and restart.`
+        );
       }
       process.exit(1);
     }
-    
+
     // Running strict command in correct mode - lock it if not already locked
     if (!strictLocked) {
       lockStrictMode();
-      console.log(`\n🔒 Strict mode enabled! Project locked into "${currentMode}" mode.\n`);
+      console.log(
+        `\n🔒 Strict mode enabled! Project locked into "${currentMode}" mode.\n`
+      );
     }
-    
+
     // Run the command in the correct mode
     return runByMode(currentMode, command);
   }
@@ -128,7 +137,9 @@ const main = async () => {
     }
 
     if (action === "change" && strictLocked) {
-      console.log("❌ Cannot change mode in strict mode. Delete .mode_lock file to unlock.");
+      console.log(
+        "❌ Cannot change mode in strict mode. Delete .mode_lock file to unlock."
+      );
       process.exit(1);
     }
 
@@ -145,9 +156,13 @@ const main = async () => {
   // --- Validate commands against current mode ---
   if (REACT_MODE_COMMANDS.includes(command)) {
     if (currentMode !== "react") {
-      console.log(`❌ Project is locked in "${currentMode}" mode. Cannot use React commands.`);
+      console.log(
+        `❌ Project is locked in "${currentMode}" mode. Cannot use React commands.`
+      );
       if (strictLocked) {
-        console.log(`💡 To change modes, manually delete the .mode_lock file and restart.`);
+        console.log(
+          `💡 To change modes, manually delete the .mode_lock file and restart.`
+        );
       }
       process.exit(1);
     }
@@ -156,9 +171,13 @@ const main = async () => {
 
   if (REACT_NATIVE_MODE_COMMANDS.includes(command)) {
     if (currentMode !== "rn") {
-      console.log(`❌ Project is locked in "${currentMode}" mode. Cannot use React Native commands.`);
+      console.log(
+        `❌ Project is locked in "${currentMode}" mode. Cannot use React Native commands.`
+      );
       if (strictLocked) {
-        console.log(`💡 To change modes, manually delete the .mode_lock file and restart.`);
+        console.log(
+          `💡 To change modes, manually delete the .mode_lock file and restart.`
+        );
       }
       process.exit(1);
     }
@@ -167,9 +186,13 @@ const main = async () => {
 
   if (NODE_MODE_COMMANDS.includes(command)) {
     if (currentMode !== "node") {
-      console.log(`❌ Project is locked in "${currentMode}" mode. Cannot use Node commands.`);
+      console.log(
+        `❌ Project is locked in "${currentMode}" mode. Cannot use Node commands.`
+      );
       if (strictLocked) {
-        console.log(`💡 To change modes, manually delete the .mode_lock file and restart.`);
+        console.log(
+          `💡 To change modes, manually delete the .mode_lock file and restart.`
+        );
       }
       process.exit(1);
     }
@@ -177,9 +200,11 @@ const main = async () => {
   }
 
   // --- Unknown command ---
-  console.log("❓ Unknown command. Available commands depend on your current mode:");
+  console.log(
+    "❓ Unknown command. Available commands depend on your current mode:"
+  );
   console.log(`📍 Current mode: "${currentMode}"`);
-  
+
   if (currentMode === "react") {
     console.log("🔵 React commands available");
   } else if (currentMode === "rn") {
@@ -187,11 +212,13 @@ const main = async () => {
   } else if (currentMode === "node") {
     console.log("🟢 Node commands available");
   }
-  
+
   if (strictLocked) {
     console.log("🔒 Project is in strict mode");
   }
 };
+
+console.log("🚀 Starting Ignite CLI...");
 
 if (require.main === module) {
   main().catch((err) => {
