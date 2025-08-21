@@ -218,7 +218,6 @@ const main = async () => {
   }
 };
 
-console.log("🚀 Starting Ignite CLI...");
 
 if (require.main === module) {
   main().catch((err) => {
