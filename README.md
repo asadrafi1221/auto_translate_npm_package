@@ -1,536 +1,291 @@
-# 🌍 Auto-Translation CLI
+# Auto Translation 🌐
 
-[![npm version](https://badge.fury.io/js/auto-translation.svg)](https://badge.fury.io/js/auto-translation)
-[![Downloads](https://img.shields.io/npm/dm/auto-translation.svg)](https://npmjs.org/package/auto-translation)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Node.js](https://img.shields.io/badge/Node.js-14%2B-green.svg)](https://nodejs.org/)
+A powerful CLI tool for automating internationalization (i18n) in your React projects. Streamline your translation workflow with intelligent text extraction, automated wrapping, and seamless i18n setup.
 
-> **Stop wasting hours on manual i18n setup. Automate your entire internationalization workflow in seconds.**
+## ✨ Features
 
-A powerful CLI tool that automatically extracts translatable strings from your React components, wraps them with translation functions, and generates complete i18n file structures. Built by a developer who got tired of doing the same repetitive i18n work over and over again.
+- 🚀 **One-command setup** - Initialize complete i18n structure instantly
+- 🔍 **Smart text scanning** - Automatically detect translatable content
+- 🔄 **Automatic wrapping** - Convert plain text to translation calls
+- 📁 **File management** - Organize and maintain translation files
+- 🎯 **Mode-based workflow** - Project-specific configurations
+- 🔒 **Strict mode** - Lock project to prevent mode conflicts
+- 📊 **Configuration tracking** - Persistent project settings
 
-## 🚀 Why Auto-Translation?
+## 🏗️ Architecture
 
-**Before this tool existed:**
-- ⏰ **3-4 hours** setting up i18n structure manually
-- 🔍 **Hours** hunting through files for hardcoded strings  
-- 🔄 **Manual wrapping** of every single text element
-- 📁 **Manual creation** of translation files and folder structures
-- 🐛 **Human errors** and missed strings
+The package operates in different modes to support various project types:
 
-**After using Auto-Translation:**
-- ⚡ **30 seconds** for complete i18n setup
-- 🎯 **Automatic detection** of all translatable content
-- 🤖 **Intelligent wrapping** with `t()` functions
-- 📂 **Auto-generated** organized file structure
-- ✅ **100% coverage** with zero missed strings
+- **React Mode** 🔵 - Full React i18n support (Currently Available)
+- **React Native Mode** 📱 - Mobile app support (Coming Soon)
+- **Node.js Mode** 🟢 - Backend/server support (Coming Soon)
 
 ## 📦 Installation
 
-```bash
-# Use directly with npx (recommended)
-npx auto-translation init
+[![npm version](https://badge.fury.io/js/auto-translation.svg)](https://www.npmjs.com/package/auto-translation)
+[![GitHub](https://img.shields.io/github/license/asadrafi1221/auto_translate_npm_package)](https://github.com/asadrafi1221/auto_translate_npm_package)
 
-# Or install globally
+```bash
 npm install -g auto-translation
+# or
+npx auto-translation
 ```
 
-## ⚡ Quick Start
+**Links:**
+- 📦 [NPM Package](https://www.npmjs.com/package/auto-translation)
+- 🐙 [GitHub Repository](https://github.com/asadrafi1221/auto_translate_npm_package)
 
-Transform your entire project in 4 simple commands:
+## 🚀 Quick Start
+
+### 1. Initialize Your Project
 
 ```bash
-# 1. Initialize complete i18n setup (30 seconds)
-npx auto-translation init
-
-# 2. Import in your root component
-# Add this line to your App.js or index.js:
-import './i18n';
-
-# 3. Auto-wrap all hardcoded strings
-npx auto-translation wrap
-
-# 4. Scan for any new strings (ongoing)
-npx auto-translation scan
+npx auto-translation
 ```
 
-**That's it!** Your React app now supports multiple languages.
+Select **React** mode when prompted. This will:
+- Set up your project configuration
+- Create the necessary folder structure
 
-## 🎯 Core Features
+### 2. Complete React i18n Setup
 
-### 🏗️ **Complete Setup Automation**
 ```bash
 npx auto-translation init
 ```
-- Creates organized folder structure
-- Installs required dependencies (`i18next`, `react-i18next`)
-- Generates configuration files
-- Sets up language files (EN, ES, FR by default)
 
-### 🔍 **Smart String Detection**
+This command will:
+- ✅ Install required dependencies (`react-i18next`, `i18next`)
+- 🏗️ Create i18n folder structure
+- 📝 Generate configuration files
+- 🔧 Set up translation namespace files
+
+### 3. Scan and Extract Translation Keys
+
 ```bash
 npx auto-translation scan
 ```
-- Scans your entire codebase
-- Identifies translatable strings
-- Updates translation files automatically
-- Maintains existing translations
 
-### 🔄 **Automatic Text Wrapping**
+Interactive file selection process:
+- 📂 Choose directories or specific files to scan
+- 🔍 Automatically detect translatable text
+- 📝 Extract keys to translation files
+- 🎯 Smart detection of JSX text content
+
+### 4. Auto-wrap Plain Text (Optional)
+
 ```bash
 npx auto-translation wrap
 ```
 
-**Before:**
+Automatically converts plain text to translation calls:
 ```jsx
-const Header = () => (
-  <div>
-    <h1>Welcome to Dashboard</h1>
-    <p>Manage your account settings</p>
-    <button>Save Changes</button>
-  </div>
-);
+// Before
+<h1>Welcome to our app</h1>
+
+// After
+<h1>{t('welcome_to_our_app')}</h1>
 ```
 
-**After (automatically transformed):**
-```jsx
-const Header = () => (
-  <div>
-    <h1>{t('welcome_to_dashboard')}</h1>
-    <p>{t('manage_your_account_settings')}</p>
-    <button>{t('save_changes')}</button>
-  </div>
-);
-```
+## 📋 Available Commands
 
-### 📁 **File Management**
+### Core Commands (Auto-prefixed based on your project mode)
+
+| Command | Description |
+|---------|-------------|
+| `init` | Complete i18n setup with dependencies |
+| `scan` | Scan and extract translation keys from files |
+| `wrap` | Wrap plain text with t() translation calls |
+| `file-update` | Manage translation files and structure |
+| `setup` | Setup i18n folder structure only |
+| `ignore-init` | Initialize .ignoreKeys file |
+
+> 💡 **Smart Mode System**: Commands are automatically prefixed based on your project mode. When in React mode, `scan` becomes `react-scan` internally.
+
+### Configuration Commands
+
+| Command | Description |
+|---------|-------------|
+| `config` | Show current project configuration |
+| `reset-config` | Reset configuration to defaults |
+
+### Mode Management
+
+| Command | Description |
+|---------|-------------|
+| `npx auto-translation` | Interactive mode selection menu |
+
+## 🎯 Project Modes & Smart Command System
+
+### Mode Selection
+When you first run the CLI, you'll select a project mode that determines available commands and behavior.
+
+### Smart Command Prefixing 🎯
+The package automatically handles command prefixing based on your selected mode:
+- In **React mode**: `scan` → `react-scan` (handled internally)
+- In **React Native mode**: `scan` → `rn-scan` (coming soon)
+- In **Node.js mode**: `scan` → `node-scan` (coming soon)
+
+You simply use the clean commands like `scan`, `init`, `wrap` - the mode system handles the rest!
+
+### Strict Mode 🔒
+Once you run mode-specific commands, the project enters **strict mode**:
+- Prevents accidental cross-mode command usage
+- Locks the project to the selected mode
+- Ensures consistency across team members
+
+### Unlocking Modes
+To change modes or disable strict mode:
 ```bash
-npx auto-translation file-update
+npx auto-translation
+# Select "Unlock strict mode" from the menu
 ```
-- Organizes translation files
-- Removes unused keys
-- Syncs across all language files
-- Maintains clean structure
 
-## 🗂️ Generated Structure
+## 📁 Generated Structure
 
-After running `init`, your project gets this organized structure:
+After running `init`, your project will have:
 
 ```
 your-project/
-├── i18n/
-│   ├── locales/
-│   │   ├── en/
-│   │   │   └── common.json        # English translations
-│   │   ├── es/
-│   │   │   └── common.json        # Spanish translations
-│   │   └── fr/
-│   │       └── common.json        # French translations
-│   ├── config.js                  # i18n configuration
-│   └── index.js                   # Main i18n setup
 ├── src/
-│   └── components/
-└── package.json                   # Updated with dependencies
+│   └── i18n/
+│       ├── index.js          # i18n configuration
+│       ├── locales/
+│       │   ├── en/
+│       │   │   └── common.json
+│       │   └── es/
+│       │       └── common.json
+│       └── resources.js      # Resource loader
+└── .translate-package-config  # Project configuration
 ```
 
-**Generated translation file example:**
+## 🔧 Configuration File
+
+The `.translate-package-config` file stores:
 ```json
 {
-  "welcome_to_dashboard": "Welcome to Dashboard",
-  "manage_your_account_settings": "Manage your account settings",
-  "save_changes": "Save Changes",
-  "user_profile": "User Profile",
-  "logout": "Logout"
+  "mode": "react",
+  "strictLocked": true,
+  "createdAt": "2025-01-15T10:30:00.000Z",
+  "lastModified": "2025-01-15T10:35:00.000Z"
 }
 ```
 
-## ⚙️ Configuration
+## 🎮 Interactive Workflows
 
-Auto-generated `i18n/config.js` with customizable options:
+### File Selection During Scan
+When running `scan`, you'll get an interactive file picker:
+- Select individual files or entire directories
+- Preview files before processing
+- Skip files that shouldn't be translated
 
-```javascript
-module.exports = {
-  // Default language
-  defaultLocale: 'en',
-  
-  // Supported languages
-  locales: ['en', 'es', 'fr'],
-  
-  // File patterns to scan
-  scanPatterns: [
-    'src/**/*.{js,jsx,ts,tsx}',
-    'pages/**/*.{js,jsx,ts,tsx}',
-    'components/**/*.{js,jsx,ts,tsx}'
-  ],
-  
-  // Patterns to ignore
-  ignorePatterns: [
-    'node_modules/**',
-    'dist/**',
-    'build/**',
-    '*.test.{js,jsx,ts,tsx}'
-  ],
-  
-  // Translation function names to recognize
-  translationFunctions: ['t', 'translate', '$t'],
-  
-  // Output directory for translations
-  outputDir: './i18n/locales',
-  
-  // Key naming strategy
-  keyStrategy: 'snake_case' // or 'camelCase', 'kebab-case'
-};
-```
+### Ignore Keys Setup
+Use `ignore-init` to create an `.ignoreKeys` file for:
+- Technical terms that shouldn't be translated
+- Brand names and proper nouns
+- Code-specific terminology
 
-## 🛠️ Commands Reference
+## 💡 Best Practices
 
-### `init` - Complete Project Setup
+### 1. Project Setup Workflow
 ```bash
+# 1. Initialize project mode
+npx auto-translation
+
+# 2. Complete i18n setup
 npx auto-translation init
-```
-**What it does:**
-- 📁 Creates i18n folder structure
-- 📦 Installs `i18next` and `react-i18next`
-- ⚙️ Generates configuration files
-- 🌐 Creates initial language files
-- 📋 Provides setup instructions
 
-**Perfect for:** New projects or adding i18n to existing projects
+# 3. Import i18n in your main component
+import '../i18n'
 
----
-
-### `scan` - Extract Translation Keys  
-```bash
+# 4. Scan for translation keys
 npx auto-translation scan
-```
-**What it does:**
-- 🔍 Scans all matching files for strings
-- 🗝️ Extracts potential translation keys
-- 📝 Updates JSON translation files
-- 🔄 Preserves existing translations
 
-**Perfect for:** Regular maintenance and finding new strings
-
----
-
-### `wrap` - Auto-wrap Plain Text
-```bash
+# 5. (Optional) Auto-wrap remaining text
 npx auto-translation wrap
 ```
-**What it does:**
-- 🎯 Identifies hardcoded strings in JSX
-- 🔄 Wraps them with `t()` functions
-- 🧠 Smart detection (avoids props, variables, etc.)
-- 💾 Updates source files in place
 
-**Perfect for:** Converting existing codebases
+### 2. Team Collaboration
+- Commit `.translate-package-config` to version control
+- Use strict mode to ensure consistency
+- Share `.ignoreKeys` file across team members
 
----
+### 3. Maintenance
+- Run `scan` regularly for new components
+- Use `file-update` to reorganize translation files
+- Monitor configuration with `config` command
 
-### `file-update` - Manage Translation Files
+## 🔍 Usage Examples
+
+### Basic React Setup
 ```bash
+# Initialize new React project for i18n
+npx auto-translation
+# Choose "React" mode
+
+# Complete setup with dependencies
+npx auto-translation init
+
+# Scan components for translatable text
+npx auto-translation scan
+# Select files/folders to process
+```
+
+### Advanced Workflow
+```bash
+# Check project status
+npx auto-translation config
+
+# Initialize ignore patterns
+npx auto-translation ignore-init
+
+# Scan specific components
+npx auto-translation scan
+
+# Manage translation files
 npx auto-translation file-update
-```
-**What it Does:**
-- 🧹 Removes unused translation keys
-- 🔄 Syncs keys across all language files
-- 📊 Reports translation status
-- 🗂️ Maintains file organization
 
-**Perfect for:** Keeping translations clean and organized
-
----
-
-### `setup` - Structure Only
-```bash
-npx auto-translation setup
-```
-**What it does:**
-- 📁 Creates folder structure only
-- ⚙️ Generates config files
-- 🚫 Skips dependency installation
-
-**Perfect for:** When you want to manage dependencies manually
-
-## 💻 Integration Examples
-
-### React with Hooks
-```jsx
-import React from 'react';
-import { useTranslation } from 'react-i18next';
-
-const UserProfile = () => {
-  const { t } = useTranslation();
-  
-  return (
-    <div>
-      <h2>{t('user_profile')}</h2>
-      <button>{t('edit_profile')}</button>
-      <button>{t('logout')}</button>
-    </div>
-  );
-};
+# Auto-wrap any remaining plain text
+npx auto-translation wrap
 ```
 
-### Language Switcher Component
-```jsx
-import { useTranslation } from 'react-i18next';
+## 🚧 Coming Soon
 
-const LanguageSwitcher = () => {
-  const { i18n } = useTranslation();
-  
-  return (
-    <select 
-      value={i18n.language} 
-      onChange={(e) => i18n.changeLanguage(e.target.value)}
-    >
-      <option value="en">English</option>
-      <option value="es">Español</option>
-      <option value="fr">Français</option>
-    </select>
-  );
-};
-```
-
-### Next.js Integration
-```javascript
-// next.config.js
-const { i18n } = require('./i18n/config');
-
-module.exports = {
-  i18n: {
-    locales: i18n.locales,
-    defaultLocale: i18n.defaultLocale,
-  },
-};
-```
-
-## 🔧 Advanced Usage
-
-### Custom Build Integration
-Add to your `package.json`:
-
-```json
-{
-  "scripts": {
-    "i18n:scan": "auto-translation scan",
-    "i18n:wrap": "auto-translation wrap",
-    "i18n:update": "auto-translation file-update",
-    "prebuild": "npm run i18n:scan",
-    "build": "react-scripts build"
-  }
-}
-```
-
-### Git Hooks Integration
-```bash
-# .husky/pre-commit
-#!/bin/sh
-npx auto-translation scan
-git add i18n/locales/
-```
-
-### CI/CD Pipeline
-```yaml
-# .github/workflows/i18n-check.yml
-name: i18n Check
-on: [push, pull_request]
-
-jobs:
-  check-translations:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
-      - run: npx auto-translation scan
-      - run: git diff --exit-code i18n/locales/
-```
-
-## 🎯 Framework Support
-
-| Framework | Support | Status |
-|-----------|---------|---------|
-| **React** | ✅ Full | Native support |
-| **Next.js** | ✅ Full | Built-in integration |
-| **Vue.js** | 🔄 Planned | Coming soon |
-| **Angular** | 🔄 Planned | Coming soon |
-| **Svelte** | 🔄 Planned | Coming soon |
-
-## 📊 Before vs After Comparison
-
-### Manual i18n Setup (Traditional Way)
-```bash
-# 1. Create folder structure manually (15 min)
-mkdir -p src/i18n/locales/en src/i18n/locales/es src/i18n/locales/fr
-
-# 2. Install dependencies manually (5 min)
-npm install i18next react-i18next
-
-# 3. Create config files manually (30 min)
-# Write configuration, setup files, etc.
-
-# 4. Find and wrap strings manually (2-4 hours)
-# Hunt through every file, wrap every string by hand
-
-# 5. Create translation files manually (1 hour)
-# Manually create JSON files, organize keys
-
-# Total time: 3-5 hours of tedious work
-```
-
-### With Auto-Translation (The Smart Way)
-```bash
-# 1. Complete setup
-npx auto-translation init          # 30 seconds
-
-# 2. Auto-wrap everything  
-npx auto-translation wrap          # 10 seconds
-
-# 3. Done!
-# Total time: 40 seconds
-```
-
-**Result: Save 3-5 hours of manual work every single time.**
-
-## 🐛 Troubleshooting
-
-### Common Issues & Solutions
-
-**❌ "Command not found"**
-```bash
-# Solution: Use npx or install globally
-npx auto-translation init
-# or
-npm install -g auto-translation
-```
-
-**❌ "No files found to scan"**
-```bash
-# Solution: Check your scanPatterns in i18n/config.js
-{
-  "scanPatterns": [
-    "src/**/*.{js,jsx,ts,tsx}",  // Adjust path to match your structure
-    "components/**/*.{js,jsx}"
-  ]
-}
-```
-
-**❌ "Dependencies not installing"**
-```bash
-# Solution: Ensure Node.js 14+ and try clearing cache
-node --version                    # Should be 14+
-npm cache clean --force
-npx auto-translation init
-```
-
-**❌ "Wrapped text looks wrong"**
-```bash
-# Solution: Review changes before committing
-git diff                         # Review all changes
-# Adjust translationFunctions in config if needed
-{
-  "translationFunctions": ["t", "translate", "$t", "i18n.t"]
-}
-```
-
-**❌ "Missing translation keys"**
-```bash
-# Solution: Run scan after making changes
-npx auto-translation scan
-# Check console output for any errors
-```
-
-### Getting Help
-
-```bash
-# Show all available commands
-npx auto-translation --help
-
-# Check version
-npx auto-translation --version
-
-# Verbose output for debugging
-npx auto-translation init --verbose
-```
-
-## 🚀 Performance Impact
-
-### Bundle Size Impact
-- **i18next**: ~15KB gzipped
-- **react-i18next**: ~8KB gzipped
-- **Your translations**: Depends on content
-- **Runtime overhead**: Negligible
-
-### Build Time Impact
-- **Initial setup**: +30 seconds (one time)
-- **Ongoing scans**: +2-5 seconds per build
-- **Overall impact**: Minimal
-
-## 📈 Stats & Usage
-
-- **⚡ Setup time**: 30 seconds vs 3-4 hours manual
-- **🎯 Accuracy**: 100% string detection vs human error-prone
-- **🔄 Maintenance**: Automated vs manual file management
-- **📦 Bundle impact**: Minimal (~25KB) for full i18n support
-- **🌐 Language support**: Unlimited (JSON-based)
-
-## 🗺️ Roadmap
-
-### ✅ Current Features
-- Complete React support
-- Automatic string extraction
-- Smart text wrapping
-- File management
-- Multi-language setup
-
-### 🔄 In Progress
-- TypeScript support improvements
-- Better key naming strategies
-- Translation validation
-
-### 📋 Planned Features
-- **Vue.js support** - Full Vue integration
-- **Angular support** - Angular i18n workflow
-- **VS Code extension** - IDE integration
-- **Translation services** - Google Translate API integration
-- **Missing key detection** - Runtime translation validation
-- **Pluralization support** - Complex plural forms
-- **Namespace management** - Advanced key organization
+- **React Native Mode** 📱 - Complete mobile app i18n support
+- **Node.js Mode** 🟢 - Backend translation management
+- **Advanced scanning options** - Custom patterns and rules
+- **Translation validation** - Consistency checking
+- **Bulk operations** - Mass file processing
 
 ## 🤝 Contributing
 
-Found a bug? Have a feature request? Contributions are welcome!
+We welcome contributions! Please:
+1. Fork the [repository](https://github.com/asadrafi1221/auto_translate_npm_package)
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
 
-1. **Report Issues**: [GitHub Issues](https://github.com/asadrafi1221/auto_translate_npm_package/issues)
-2. **Feature Requests**: Open an issue with your idea
-3. **Pull Requests**: Fork, improve, and submit a PR
-4. **Documentation**: Help improve these docs
+**Repository:** [https://github.com/asadrafi1221/auto_translate_npm_package](https://github.com/asadrafi1221/auto_translate_npm_package)
 
 ## 📄 License
 
-MIT License - Use freely in personal and commercial projects.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-## 👨‍💻 About the Author
+## 🆘 Support
 
-Built by **Asad Rafi** - A developer who got tired of spending hours on manual i18n setup and decided to automate it once and for all.
+For issues, questions, or feature requests:
 
-- 📧 Email: [asadrafi1221@gmail.com](mailto:asadrafi1221@gmail.com)
-- 🐙 GitHub: [asadrafi1221](https://github.com/asadrafi1221)
-- 🌐 Package: [auto-translation](https://www.npmjs.com/package/auto-translation)
+- 🐛 **Issues & Bugs**: [Create an issue on GitHub](https://github.com/asadrafi1221/auto_translate_npm_package/issues)
+- 💬 **Questions**: Check existing documentation or open a discussion
+- 📧 **Direct Contact**: [asadradi1221@gmail.com](mailto:asadradi1221@gmail.com)
+- 📦 **NPM Package**: [auto-translation on npm](https://www.npmjs.com/package/auto-translation)
 
----
+## 🔗 Links
 
-## ⭐ Show Your Support
-
-If this tool saved you hours of work, please:
-- ⭐ **Star this package** on npm
-- 🐙 **Star the GitHub repo**
-- 📢 **Share with your team**
-- 🐛 **Report issues** you find
-- 💡 **Suggest improvements**
-
-**Every star motivates me to keep building tools that make developers' lives easier!**
+- **GitHub Repository**: [https://github.com/asadrafi1221/auto_translate_npm_package](https://github.com/asadrafi1221/auto_translate_npm_package)
+- **NPM Package**: [https://www.npmjs.com/package/auto-translation](https://www.npmjs.com/package/auto-translation)
+- **Author**: [asadradi1221@gmail.com](mailto:asadradi1221@gmail.com)
 
 ---
 
-*Made with ❤️ for the developer community. Because your time should be spent building amazing features, not fighting with i18n setup.*
+**Made with ❤️ for the international development community**
