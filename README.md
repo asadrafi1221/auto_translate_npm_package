@@ -22,7 +22,7 @@ The package operates in different modes to support various project types:
 
 ## 📦 Installation
 
-[![npm version](https://badge.fury.io/js/auto-translation.svg)](https://www.npmjs.com/package/auto-translation)
+[![2.0](https://badge.fury.io/js/auto-translation.svg)](https://www.npmjs.com/package/auto-translation)
 [![GitHub](https://img.shields.io/github/license/asadrafi1221/auto_translate_npm_package)](https://github.com/asadrafi1221/auto_translate_npm_package)
 
 ```bash
