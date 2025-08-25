@@ -1,11 +1,6 @@
 {
-  "i18nPath": "I:\\language-npmpackage\\src\\i18n",
-  "jsonFilesPath": "I:\\language-npmpackage\\src\\i18n\\localization",
-  "structureType": "file-based",
-  "currentFile": "commons",
-  "files": [
-    "commons"
-  ],
-  "translationFolder": "localization",
-  "i18nFolder": "i18n"
+  "i18nPath": "I:\\language-npmpackage\\i18n",
+  "jsonFilesPath": "I:\\language-npmpackage\\i18n\\localization",
+  "locationChoice": "2",
+  "structureType": "single-file"
 }

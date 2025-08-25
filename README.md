@@ -22,8 +22,6 @@ The package operates in different modes to support various project types:
 
 ## 📦 Installation
 
-[![GitHub](https://img.shields.io/github/license/asadrafi1221/auto_translate_npm_package)](https://github.com/asadrafi1221/auto_translate_npm_package)
-
 ```bash
 npm install -g auto-translation
 # or
@@ -31,6 +29,7 @@ npx auto-translation
 ```
 
 **Links:**
+
 - 📦 [NPM Package](https://www.npmjs.com/package/auto-translation)
 - 🐙 [GitHub Repository](https://github.com/asadrafi1221/auto_translate_npm_package)
 
@@ -43,6 +42,7 @@ npx auto-translation
 ```
 
 Select **React** mode when prompted. This will:
+
 - Set up your project configuration
 - Create the necessary folder structure
 
@@ -53,6 +53,7 @@ npx auto-translation init
 ```
 
 This command will:
+
 - ✅ Install required dependencies (`react-i18next`, `i18next`)
 - 🏗️ Create i18n folder structure
 - 📝 Generate configuration files
@@ -65,6 +66,7 @@ npx auto-translation scan
 ```
 
 Interactive file selection process:
+
 - 📂 Choose directories or specific files to scan
 - 🔍 Automatically detect translatable text
 - 📝 Extract keys to translation files
@@ -77,6 +79,7 @@ npx auto-translation wrap
 ```
 
 Automatically converts plain text to translation calls:
+
 ```jsx
 // Before
 <h1>Welcome to our app</h1>
@@ -89,37 +92,40 @@ Automatically converts plain text to translation calls:
 
 ### Core Commands (Auto-prefixed based on your project mode)
 
-| Command | Description |
-|---------|-------------|
-| `init` | Complete i18n setup with dependencies |
-| `scan` | Scan and extract translation keys from files |
-| `wrap` | Wrap plain text with t() translation calls |
-| `file-update` | Manage translation files and structure |
-| `setup` | Setup i18n folder structure only |
-| `ignore-init` | Initialize .ignoreKeys file |
+| Command       | Description                                  |
+| ------------- | -------------------------------------------- |
+| `init`        | Complete i18n setup with dependencies        |
+| `scan`        | Scan and extract translation keys from files |
+| `wrap`        | Wrap plain text with t() translation calls   |
+| `file-update` | Manage translation files and structure       |
+| `setup`       | Setup i18n folder structure only             |
+| `ignore-init` | Initialize .ignoreKeys file                  |
 
 > 💡 **Smart Mode System**: Commands are automatically prefixed based on your project mode. When in React mode, `scan` becomes `react-scan` internally.
 
 ### Configuration Commands
 
-| Command | Description |
-|---------|-------------|
-| `config` | Show current project configuration |
-| `reset-config` | Reset configuration to defaults |
+| Command        | Description                        |
+| -------------- | ---------------------------------- |
+| `config`       | Show current project configuration |
+| `reset-config` | Reset configuration to defaults    |
 
 ### Mode Management
 
-| Command | Description |
-|---------|-------------|
+| Command                | Description                     |
+| ---------------------- | ------------------------------- |
 | `npx auto-translation` | Interactive mode selection menu |
 
 ## 🎯 Project Modes & Smart Command System
 
 ### Mode Selection
+
 When you first run the CLI, you'll select a project mode that determines available commands and behavior.
 
 ### Smart Command Prefixing 🎯
+
 The package automatically handles command prefixing based on your selected mode:
+
 - In **React mode**: `scan` → `react-scan` (handled internally)
 - In **React Native mode**: `scan` → `rn-scan` (coming soon)
 - In **Node.js mode**: `scan` → `node-scan` (coming soon)
@@ -127,13 +133,17 @@ The package automatically handles command prefixing based on your selected mode:
 You simply use the clean commands like `scan`, `init`, `wrap` - the mode system handles the rest!
 
 ### Strict Mode 🔒
+
 Once you run mode-specific commands, the project enters **strict mode**:
+
 - Prevents accidental cross-mode command usage
 - Locks the project to the selected mode
 - Ensures consistency across team members
 
 ### Unlocking Modes
+
 To change modes or disable strict mode:
+
 ```bash
 npx auto-translation
 # Select "Unlock strict mode" from the menu
@@ -160,6 +170,7 @@ your-project/
 ## 🔧 Configuration File
 
 The `.translate-package-config` file stores:
+
 ```json
 {
   "mode": "react",
@@ -172,13 +183,17 @@ The `.translate-package-config` file stores:
 ## 🎮 Interactive Workflows
 
 ### File Selection During Scan
+
 When running `scan`, you'll get an interactive file picker:
+
 - Select individual files or entire directories
 - Preview files before processing
 - Skip files that shouldn't be translated
 
 ### Ignore Keys Setup
+
 Use `ignore-init` to create an `.ignoreKeys` file for:
+
 - Technical terms that shouldn't be translated
 - Brand names and proper nouns
 - Code-specific terminology
@@ -186,6 +201,7 @@ Use `ignore-init` to create an `.ignoreKeys` file for:
 ## 💡 Best Practices
 
 ### 1. Project Setup Workflow
+
 ```bash
 # 1. Initialize project mode
 npx auto-translation
@@ -204,11 +220,13 @@ npx auto-translation wrap
 ```
 
 ### 2. Team Collaboration
+
 - Commit `.translate-package-config` to version control
 - Use strict mode to ensure consistency
 - Share `.ignoreKeys` file across team members
 
 ### 3. Maintenance
+
 - Run `scan` regularly for new components
 - Use `file-update` to reorganize translation files
 - Monitor configuration with `config` command
@@ -216,6 +234,7 @@ npx auto-translation wrap
 ## 🔍 Usage Examples
 
 ### Basic React Setup
+
 ```bash
 # Initialize new React project for i18n
 npx auto-translation
@@ -230,6 +249,7 @@ npx auto-translation scan
 ```
 
 ### Advanced Workflow
+
 ```bash
 # Check project status
 npx auto-translation config
@@ -258,6 +278,7 @@ npx auto-translation wrap
 ## 🤝 Contributing
 
 We welcome contributions! Please:
+
 1. Fork the [repository](https://github.com/asadrafi1221/auto_translate_npm_package)
 2. Create a feature branch
 3. Make your changes
