@@ -14,7 +14,31 @@ const {
 const { reactMain } = require("./src/web/main/index.js");
 const { starter } = require("./src/global/functions/logs.js");
 
-const CONFIG_FILE = path.resolve(process.cwd(), ".translate-package-config");
+//
+// 🔹 Find project root (by looking for package.json)
+//
+const findProjectRoot = (startDir = process.cwd()) => {
+  let dir = startDir;
+
+  while (true) {
+    const pkgPath = path.join(dir, "package.json");
+    if (fs.existsSync(pkgPath)) {
+      return dir;
+    }
+
+    const parent = path.dirname(dir);
+    if (parent === dir) break; // reached filesystem root
+    dir = parent;
+  }
+
+  return process.cwd(); // fallback
+};
+
+//
+// 🔹 Config file path (always in project root)
+//
+const PROJECT_ROOT = findProjectRoot();
+const CONFIG_FILE = path.join(PROJECT_ROOT, ".translate-package-config");
 
 const DEFAULT_CONFIG = {
   mode: null,
@@ -23,6 +47,9 @@ const DEFAULT_CONFIG = {
   lastModified: new Date().toISOString(),
 };
 
+//
+// Config helpers
+//
 const readConfig = () => {
   try {
     if (!fs.existsSync(CONFIG_FILE)) return { ...DEFAULT_CONFIG };
@@ -60,6 +87,9 @@ const isStrictLocked = () => readConfig().strictLocked;
 const lockStrictMode = () => writeConfig({ strictLocked: true });
 const unlockStrictMode = () => writeConfig({ strictLocked: false });
 
+//
+// Status printing
+//
 const showConfigStatus = () => {
   const config = readConfig();
   console.log("\n📊 Project Configuration Status:");
@@ -73,6 +103,9 @@ const showConfigStatus = () => {
   console.log();
 };
 
+//
+// Mode + command mapping
+//
 const getModeFromStrictCommand = (command) => {
   const modeMap = {
     react: "react",
@@ -131,6 +164,9 @@ const runByMode = (mode, command) => {
   return modeActions[mode] ? modeActions[mode]() : null;
 };
 
+//
+// Command handlers
+//
 const handleSpecialCommands = (command) => {
   switch (command) {
     case "config":
@@ -261,19 +297,21 @@ const showUnknownCommandHelp = (currentMode, strictLocked) => {
   console.log("   reset-config    - Reset configuration to defaults");
 };
 
+//
+// Command parsing helpers
+//
 const isExcludedCommand = (command, allArgs) => {
   const excludedCommands = [
     "node",
     "npm",
     "npx",
     "yarn",
-    "pnpm", // Package managers and Node
-    "auto-translation", // Main CLI command
+    "pnpm",
+    "auto-translation",
     "config",
-    "reset-config", // Special config commands
+    "reset-config",
   ];
 
-  // Check for "node index.js" pattern
   if (command === "node" && allArgs[1]?.includes(".js")) {
     return true;
   }
@@ -284,26 +322,22 @@ const isExcludedCommand = (command, allArgs) => {
 const getActualCommand = (allArgs) => {
   const [first, second, third] = allArgs;
 
-  // Handle "node index.js command" pattern
   if (first === "node" && second?.includes(".js") && third) {
     return third;
   }
 
-  // Handle "node script.js command" pattern
   if (first === "node" && second?.includes(".js")) {
-    return null; // No command after script
+    return null;
   }
 
-  // Standard case: first argument is the command
   return first;
 };
 
 const shouldAutoPrefix = (command, currentMode, allArgs) => {
   if (!command || !currentMode) return false;
   if (isExcludedCommand(allArgs[0], allArgs)) return false;
-  if (STRICT_COMMANDS.includes(command)) return false; // Already mode-prefixed
+  if (STRICT_COMMANDS.includes(command)) return false;
 
-  // Check if it's already a mode command
   const allModeCommands = [
     ...REACT_MODE_COMMANDS,
     ...REACT_NATIVE_MODE_COMMANDS,
@@ -313,6 +347,9 @@ const shouldAutoPrefix = (command, currentMode, allArgs) => {
   return !allModeCommands.includes(command);
 };
 
+//
+// Mode initialization
+//
 const initializeMode = async () => {
   console.log(`🎯 Welcome! Please select your project mode:\n`);
   const mode = await starter();
@@ -322,6 +359,9 @@ const initializeMode = async () => {
   return runByMode(currentMode);
 };
 
+//
+// Main entry
+//
 const main = async () => {
   const allArgs = process.argv.slice(2);
   const command = getActualCommand(allArgs);
@@ -353,17 +393,14 @@ const main = async () => {
     );
   }
 
-  // Auto-prefix ALL commands with current mode (except excluded ones)
   if (shouldAutoPrefix(command, currentMode, allArgs)) {
     const modeCommand = `${currentMode}-${command}`;
     console.log(
       `🔄 Running "${command}" as "${modeCommand}" in ${currentMode} mode`
     );
 
-    // Try to run as mode command first
     if (handleModeCommands(modeCommand, currentMode, strictLocked)) return;
 
-    // Fallback to direct execution
     return runByMode(currentMode, modeCommand);
   }
 

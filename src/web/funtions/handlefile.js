@@ -4,6 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const readline = require("readline");
 const { askQuestion } = require("./cli.commands.js");
+const { findFile } = require("./globals.funtions.js");
 
 const createDirectory = (dirPath) => {
   if (!fs.existsSync(dirPath)) {
@@ -18,7 +19,7 @@ const writeFile = (filePath, content) => {
 };
 
 const manageFiles = async () => {
-  const configPath = path.join(process.cwd(), ".auto-translation-config.json");
+  const configPath = findFile('.auto-translation-config.json');
 
   if (!fs.existsSync(configPath)) {
     console.log("❌ No config found! Run 'npx auto-translation init' first.");
@@ -92,7 +93,7 @@ const updateExistingFile = async (config) => {
   config.currentFile = selectedFile;
 
   // Save updated config
-  const configPath = path.join(process.cwd(), ".auto-translation-config.json");
+  const configPath = findFile('.auto-translation-config.json');
   fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
 
   console.log(`✅ Switched to file: ${selectedFile}`);
@@ -180,7 +181,7 @@ export default enJSON;`;
   config.files.push(sanitizedFileName);
   config.currentFile = sanitizedFileName;
 
-  const configPath = path.join(process.cwd(), ".auto-translation-config.json");
+  const configPath = findFile('.auto-translation-config.json');
   fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
 
   console.log(`✅ Created new file: ${sanitizedFileName}.js`);
@@ -221,7 +222,7 @@ const switchActiveFile = async (config) => {
   config.currentFile = selectedFile;
 
   // Save updated config
-  const configPath = path.join(process.cwd(), ".auto-translation-config.json");
+  const configPath = findFile('.auto-translation-config.json');
   fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
 
   console.log(`✅ Switched to file: ${selectedFile}`);

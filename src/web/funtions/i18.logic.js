@@ -5,21 +5,6 @@ const fs = require("fs");
 const path = require("path");
 
 // ---------------- Helper Functions ----------------
-
-const getIgnoredKeys = () => {
-  const ignoreFilePath = path.join(process.cwd(), ".ignoreKeys");
-  if (fs.existsSync(ignoreFilePath)) {
-    try {
-      const content = fs.readFileSync(ignoreFilePath, "utf-8");
-      const parsed = JSON.parse(content);
-      return new Set(parsed.ignoredKeys || []);
-    } catch (error) {
-      console.warn("⚠️ Could not parse .ignoreKeys file:", error.message);
-    }
-  }
-  return new Set();
-};
-
 const flattenObject = (obj, prefix = "", res = {}) => {
   for (const key in obj) {
     if (typeof obj[key] === "object" && obj[key] !== null) {
@@ -107,6 +92,64 @@ const findFiles = (dir, extensions = [".tsx", ".jsx", ".js", ".ts"]) => {
   return results;
 };
 
+const findI18nFolder = (startDir = process.cwd()) => {
+  const visited = new Set();
+
+  // Find project root
+  const findProjectRoot = (dir) => {
+    while (true) {
+      const indicators = ["package.json", ".git", "node_modules"];
+      const hasIndicator = indicators.some((indicator) =>
+        fs.existsSync(path.join(dir, indicator))
+      );
+
+      if (hasIndicator) return dir;
+
+      const parent = path.dirname(dir);
+      if (parent === dir) return dir;
+      dir = parent;
+    }
+  };
+
+  // Recursive search for i18n folder
+  const searchForI18n = (dir) => {
+    if (visited.has(dir)) return null;
+    visited.add(dir);
+
+    try {
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+
+      // Check if i18n folder exists in current directory
+      for (const entry of entries) {
+        if (entry.isDirectory() && entry.name === "i18n") {
+          return path.join(dir, "i18n");
+        }
+      }
+
+      // Search subdirectories
+      for (const entry of entries) {
+        if (
+          entry.isDirectory() &&
+          !entry.name.startsWith(".") &&
+          entry.name !== "node_modules" &&
+          entry.name !== "dist" &&
+          entry.name !== "build"
+        ) {
+          const result = searchForI18n(path.join(dir, entry.name));
+          if (result) return result;
+        }
+      }
+    } catch (error) {
+      // Skip directories we can't read
+    }
+
+    return null;
+  };
+
+  const projectRoot = findProjectRoot(startDir);
+  return searchForI18n(projectRoot);
+};
+
 const readJsExportObject = (filePath) => {
   try {
     const fileContent = fs.readFileSync(filePath, "utf-8");
@@ -118,159 +161,57 @@ const readJsExportObject = (filePath) => {
   return {};
 };
 
-// ---------------- Main Function ----------------
+const findProjectRoot = (startDir = process.cwd()) => {
+  let dir = startDir;
+  while (true) {
+    const pkgPath = path.join(dir, "package.json");
+    if (fs.existsSync(pkgPath)) return dir; // found root
 
-// const scanAndUpdateTranslations = async (filesToScan = null) => {
-//   const ignoredKeys = getIgnoredKeys();
-//   if (ignoredKeys.size > 0)
-//     console.log(`🚫 Ignoring ${ignoredKeys.size} keys from .ignoreKeys file`);
+    const parent = path.dirname(dir);
+    if (parent === dir) break; // system root reached
+    dir = parent;
+  }
+  return process.cwd(); // fallback (shouldn't happen if pkg exists)
+};
 
-//   const configPath = path.join(process.cwd(), ".auto-translation-config.json");
-//   let config = {};
-//   let targetFile;
-//   let isFileBased = false;
-//   let currentFile = null;
+const getIgnoredKeys = () => {
+  const PROJECT_ROOT = findProjectRoot();
+  const ignoreFilePath = path.join(PROJECT_ROOT, ".ignoreKeys");
 
-//   if (fs.existsSync(configPath)) {
-//     try {
-//       config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
-//       if (config.structureType === "file-based") {
-//         isFileBased = true;
-//         currentFile = config.currentFile;
-//         targetFile = path.join(config.jsonFilesPath, `${currentFile}.js`);
-//       } else {
-//         targetFile = path.join(config.jsonFilesPath, "en.json");
-//       }
-//     } catch {
-//       targetFile = path.join(process.cwd(), "src/i18n/jsonFiles/en.json");
-//     }
-//   } else {
-//     console.log(
-//       "❌ No i18n folder found! Run 'npx auto-translation init' first."
-//     );
-//     return;
-//   }
+  if (fs.existsSync(ignoreFilePath)) {
+    try {
+      const content = fs.readFileSync(ignoreFilePath, "utf-8");
+      const parsed = JSON.parse(content);
+      return new Set(parsed.ignoredKeys || []);
+    } catch (error) {
+      console.warn("⚠️ Could not parse .ignoreKeys file:", error.message);
+    }
+  }
 
-//   let existingTranslations = {};
-//   if (fs.existsSync(targetFile)) {
-//     existingTranslations = isFileBased
-//       ? readJsExportObject(targetFile)
-//       : JSON.parse(fs.readFileSync(targetFile, "utf-8"));
-//   }
+  return new Set();
+};
 
-//   // ---------------- Determine files to scan ----------------
-//   let reactFiles = [];
-
-//   if (Array.isArray(filesToScan) && filesToScan.length > 0) {
-//     filesToScan.forEach((file) => {
-//       const absPath = path.isAbsolute(file)
-//         ? file
-//         : path.join(process.cwd(), file);
-//       if (fs.existsSync(absPath)) reactFiles.push(absPath);
-//       else console.warn(`⚠️ File not found: ${file}`);
-//     });
-
-//     if (reactFiles.length === 0) {
-//       console.error("❌ No valid files to scan. Operation cancelled.");
-//       return;
-//     }
-//   } else {
-//     // scan entire project
-//     reactFiles = findFiles(process.cwd());
-//   }
-
-//   console.log(`📁 Found ${reactFiles.length} React/TS files to scan`);
-
-//   // ---------------- Scan files ----------------
-//   const tPatterns = [
-//     /\bt\s*\(\s*['"`]([^'"`\n\r]+?)['"`]\s*\)/g,
-//     /\{\s*t\s*\(\s*['"`]([^'"`\n\r]+?)['"`]\s*\)\s*\}/g,
-//   ];
-
-//   const allFoundKeys = new Set();
-//   const newKeys = new Set();
-//   const emptyKeys = new Set();
-//   let ignoredCount = 0;
-//   let filesProcessed = 0;
-//   const flattenedExisting = flattenObject(existingTranslations);
-
-//   reactFiles.forEach((file) => {
-//     try {
-//       const content = fs.readFileSync(file, "utf-8");
-//       let fileHasKeys = false;
-
-//       tPatterns.forEach((pattern) => {
-//         let match;
-//         while ((match = pattern.exec(content)) !== null) {
-//           const key = match[1].trim();
-//           if (!key || allFoundKeys.has(key)) continue;
-//           allFoundKeys.add(key);
-//           fileHasKeys = true;
-
-//           if (ignoredKeys.has(key)) {
-//             ignoredCount++;
-//             console.log(`⏭️  Ignoring "${key}"`);
-//             continue;
-//           }
-
-//           if (!flattenedExisting[key]) newKeys.add(key);
-//         }
-//         pattern.lastIndex = 0;
-//       });
-
-//       if (fileHasKeys) filesProcessed++;
-//     } catch (error) {
-//       console.error(`❌ Error reading file ${file}:`, error.message);
-//     }
-//   });
-
-//   // ---------------- Merge and write translations ----------------
-//   const processedTranslations = processNestedKeys(
-//     existingTranslations,
-//     Array.from(newKeys),
-//     isFileBased,
-//     currentFile
-//   );
-
-//   try {
-//     if (isFileBased) {
-//       const fileContent = `export const ${currentFile} = ${JSON.stringify(
-//         processedTranslations,
-//         null,
-//         2
-//       )};`;
-//       fs.writeFileSync(targetFile, fileContent);
-//     } else {
-//       fs.writeFileSync(
-//         targetFile,
-//         JSON.stringify(processedTranslations, null, 2)
-//       );
-//     }
-
-//     console.log(
-//       `\n✅ Translation file updated: ${path.relative(
-//         process.cwd(),
-//         targetFile
-//       )}`
-//     );
-//     console.log(`📊 Files scanned: ${reactFiles.length}`);
-//     console.log(`📄 Files with translation keys: ${filesProcessed}`);
-//     console.log(`📊 Total keys found in code: ${allFoundKeys.size}`);
-//     console.log(`🆕 New keys added: ${newKeys.size}`);
-//     console.log(`🚫 Keys ignored: ${ignoredCount}`);
-//     console.log(`🛡️ Existing translations preserved!`);
-//   } catch (error) {
-//     console.error("❌ Error writing translations file:", error.message);
-//   }
-// };  /// the one in which it do no remove keys that are unused
-
-/// this one removes unused keys from the existing translations
 const scanAndUpdateTranslations = async (filesToScan = null) => {
   const ignoredKeys = getIgnoredKeys();
   if (ignoredKeys.size > 0)
     console.log(`🚫 Ignoring ${ignoredKeys.size} keys from .ignoreKeys file`);
 
-  const configPath = path.join(process.cwd(), ".auto-translation-config.json");
+  // Fix: Find project root first, then look for i18n folder from there
+  const projectRoot = findProjectRoot();
+  const configPath = path.join(projectRoot, ".auto-translation-config.json");
+
+  const i18nFolder = findI18nFolder(projectRoot); // Pass project root instead of process.cwd()
+  if (!i18nFolder) {
+    console.log(`🔍 Searched from project root: ${projectRoot}`);
+    console.log("❌ No i18n folder found in project!");
+    console.log(`🔍 Searched from project root: ${projectRoot}`);
+    return;
+  }
+
+  console.log(`✅ Found i18n folder: ${i18nFolder}`);
+
+  console.log(`✅ Found i18n folder: ${i18nFolder}`);
+
   let config = {};
   let targetFile;
   let isFileBased = false;
@@ -287,13 +228,11 @@ const scanAndUpdateTranslations = async (filesToScan = null) => {
         targetFile = path.join(config.jsonFilesPath, "en.json");
       }
     } catch {
-      targetFile = path.join(process.cwd(), "src/i18n/jsonFiles/en.json");
+      targetFile = path.join(i18nFolder, "jsonFiles", "en.json");
     }
   } else {
-    console.log(
-      "❌ No i18n folder found! Run 'npx auto-translation init' first."
-    );
-    return;
+    // Default fallback using the found i18n folder
+    targetFile = path.join(i18nFolder, "jsonFiles", "en.json");
   }
 
   let existingTranslations = {};
@@ -310,7 +249,7 @@ const scanAndUpdateTranslations = async (filesToScan = null) => {
     filesToScan.forEach((file) => {
       const absPath = path.isAbsolute(file)
         ? file
-        : path.join(process.cwd(), file);
+        : path.join(projectRoot, file); // Use project root instead of process.cwd()
       if (fs.existsSync(absPath)) reactFiles.push(absPath);
       else console.warn(`⚠️ File not found: ${file}`);
     });
@@ -320,8 +259,8 @@ const scanAndUpdateTranslations = async (filesToScan = null) => {
       return;
     }
   } else {
-    // scan entire project
-    reactFiles = findFiles(process.cwd());
+    // scan entire project from project root
+    reactFiles = findFiles(projectRoot); // Use project root instead of process.cwd()
   }
 
   console.log(`📁 Found ${reactFiles.length} React/TS files to scan`);
@@ -384,17 +323,14 @@ const scanAndUpdateTranslations = async (filesToScan = null) => {
     });
   }
 
-  // ---------------- Clean up unused keys from existing translations ----------------
+  // ---------------- Clean up unused keys ----------------
   const cleanTranslations = (obj, keysToRemove, parentKey = "") => {
     const cleaned = {};
 
     for (const [key, value] of Object.entries(obj)) {
       const fullKey = parentKey ? `${parentKey}.${key}` : key;
 
-      if (keysToRemove.has(fullKey)) {
-        // Skip this key as it's unused
-        continue;
-      }
+      if (keysToRemove.has(fullKey)) continue;
 
       if (
         typeof value === "object" &&
@@ -402,7 +338,6 @@ const scanAndUpdateTranslations = async (filesToScan = null) => {
         !Array.isArray(value)
       ) {
         const cleanedNested = cleanTranslations(value, keysToRemove, fullKey);
-        // Only include nested object if it has content after cleaning
         if (Object.keys(cleanedNested).length > 0) {
           cleaned[key] = cleanedNested;
         }
@@ -414,13 +349,12 @@ const scanAndUpdateTranslations = async (filesToScan = null) => {
     return cleaned;
   };
 
-  // Remove unused keys from existing translations
   const cleanedExistingTranslations = cleanTranslations(
     existingTranslations,
     unusedKeys
   );
 
-  // ---------------- Merge and write translations ----------------
+  // ---------------- Merge and write ----------------
   const processedTranslations = processNestedKeys(
     cleanedExistingTranslations,
     Array.from(newKeys),
@@ -444,10 +378,7 @@ const scanAndUpdateTranslations = async (filesToScan = null) => {
     }
 
     console.log(
-      `\n✅ Translation file updated: ${path.relative(
-        process.cwd(),
-        targetFile
-      )}`
+      `\n✅ Translation file updated: ${path.relative(projectRoot, targetFile)}`
     );
     console.log(`📊 Files scanned: ${reactFiles.length}`);
     console.log(`📄 Files with translation keys: ${filesProcessed}`);
@@ -457,7 +388,6 @@ const scanAndUpdateTranslations = async (filesToScan = null) => {
     console.log(`🚫 Keys ignored: ${ignoredCount}`);
     console.log(`🛡️ Active translations preserved!`);
 
-    // Show summary of changes
     if (newKeys.size > 0 || unusedKeys.size > 0) {
       console.log(`\n📝 Changes Summary:`);
       if (newKeys.size > 0) {
@@ -507,19 +437,6 @@ const undoWrap = (backupDir) => {
 
 const wrapPlainTextWithTranslation = async () => {
   // Helper: Read ignored keys from JSON file
-  const getIgnoredKeys = () => {
-    const ignoreFilePath = path.join(process.cwd(), ".ignoreKeys");
-    if (fs.existsSync(ignoreFilePath)) {
-      try {
-        const content = fs.readFileSync(ignoreFilePath, "utf-8");
-        const parsed = JSON.parse(content);
-        return new Set(parsed.ignoredKeys || []);
-      } catch (error) {
-        console.warn("⚠️ Could not parse .ignoreKeys file:", error.message);
-      }
-    }
-    return new Set();
-  };
 
   const projectRoot = process.cwd();
   const backupDir = path.join(projectRoot, ".auto-translation-backup");
@@ -571,7 +488,10 @@ const wrapPlainTextWithTranslation = async () => {
     return results;
   };
 
-  const hooksDir = path.join(projectRoot, "libs", "hooks");
+  //  Decide where to place libs/hooks
+  const srcDir = path.join(projectRoot, "src");
+  const baseDir = fs.existsSync(srcDir) ? srcDir : projectRoot;
+  const hooksDir = path.join(baseDir, "libs", "hooks");
   const hooksFile = path.join(hooksDir, "index.ts");
 
   if (!fs.existsSync(hooksDir)) {
@@ -751,8 +671,7 @@ export { useTranslation };
           }
 
           const wrapped = wrapWithTranslation(message, (key) =>
-            match
-              .replace(`'${message}'`, `t("${key}")`)
+            match.replace(`'${message}'`, `t("${key}")`)
           );
           return wrapped || match;
         });
@@ -854,9 +773,11 @@ export { useTranslation };
     console.log("👍 Changes kept.");
   }
 };
+// helper: find project root (where package.json is)
 
 async function initIgnoreKeys() {
-  const ignoreFilePath = path.join(process.cwd(), ".ignoreKeys");
+  const PROJECT_ROOT = findProjectRoot();
+  const ignoreFilePath = path.join(PROJECT_ROOT, ".ignoreKeys");
 
   // Check if file already exists
   if (fs.existsSync(ignoreFilePath)) {
