@@ -1,6 +1,6 @@
 {
   "name": "auto-translation",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Automatically extract translation keys from React components and wrap them with translation funtion and generate i18n files",
   "main": "index.js",
   "type": "commonjs",
@@ -9,7 +9,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "inside":"node ./index.js scan"
+    "inside": "node ./index.js scan"
   },
   "keywords": [
     "react",
