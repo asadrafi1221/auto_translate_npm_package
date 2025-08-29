@@ -3,6 +3,7 @@
 const { askQuestion } = require("./cli.commands.js");
 const fs = require("fs");
 const path = require("path");
+const { getCurrentMode } = require("./handle.mode.js");
 
 // ---------------- Helper Functions ----------------
 const flattenObject = (obj, prefix = "", res = {}) => {
@@ -200,15 +201,13 @@ const scanAndUpdateTranslations = async (filesToScan = null) => {
   const projectRoot = findProjectRoot();
   const configPath = path.join(projectRoot, ".auto-translation-config.json");
 
-  const i18nFolder = findI18nFolder(projectRoot); // Pass project root instead of process.cwd()
+  const i18nFolder = findI18nFolder(projectRoot);
   if (!i18nFolder) {
     console.log(`🔍 Searched from project root: ${projectRoot}`);
     console.log("❌ No i18n folder found in project!");
     console.log(`🔍 Searched from project root: ${projectRoot}`);
     return;
   }
-
-  console.log(`✅ Found i18n folder: ${i18nFolder}`);
 
   console.log(`✅ Found i18n folder: ${i18nFolder}`);
 
@@ -235,12 +234,46 @@ const scanAndUpdateTranslations = async (filesToScan = null) => {
     targetFile = path.join(i18nFolder, "jsonFiles", "en.json");
   }
 
+  // NEW: Load ALL translation files to check for existing keys
+  let allExistingTranslations = {};
   let existingTranslations = {};
-  if (fs.existsSync(targetFile)) {
-    existingTranslations = isFileBased
-      ? readJsExportObject(targetFile)
-      : JSON.parse(fs.readFileSync(targetFile, "utf-8"));
+
+  if (isFileBased && config.jsonFilesPath) {
+    // Load all translation files to check for existing keys
+    try {
+      const translationDir = config.jsonFilesPath;
+      const translationFiles = fs.readdirSync(translationDir).filter(file => file.endsWith('.js'));
+
+      console.log(`📚 Loading all translation files: ${translationFiles.join(', ')}`);
+
+      translationFiles.forEach(file => {
+        const filePath = path.join(translationDir, file);
+        try {
+          const fileTranslations = readJsExportObject(filePath);
+          const flattened = flattenObject(fileTranslations);
+          allExistingTranslations = { ...allExistingTranslations, ...flattened };
+          console.log(`   ✓ Loaded ${Object.keys(flattened).length} keys from ${file}`);
+        } catch (error) {
+          console.warn(`⚠️ Error loading ${file}:`, error.message);
+        }
+      });
+    } catch (error) {
+      console.warn(`⚠️ Error reading translation directory:`, error.message);
+    }
+
+    // Load current file separately for updating
+    if (fs.existsSync(targetFile)) {
+      existingTranslations = readJsExportObject(targetFile);
+    }
+  } else {
+    // Single file structure - load the one file
+    if (fs.existsSync(targetFile)) {
+      existingTranslations = JSON.parse(fs.readFileSync(targetFile, "utf-8"));
+      allExistingTranslations = flattenObject(existingTranslations);
+    }
   }
+
+  console.log(`📊 Total existing keys across all files: ${Object.keys(allExistingTranslations).length}`);
 
   // ---------------- Determine files to scan ----------------
   let reactFiles = [];
@@ -249,7 +282,7 @@ const scanAndUpdateTranslations = async (filesToScan = null) => {
     filesToScan.forEach((file) => {
       const absPath = path.isAbsolute(file)
         ? file
-        : path.join(projectRoot, file); // Use project root instead of process.cwd()
+        : path.join(projectRoot, file);
       if (fs.existsSync(absPath)) reactFiles.push(absPath);
       else console.warn(`⚠️ File not found: ${file}`);
     });
@@ -260,7 +293,7 @@ const scanAndUpdateTranslations = async (filesToScan = null) => {
     }
   } else {
     // scan entire project from project root
-    reactFiles = findFiles(projectRoot); // Use project root instead of process.cwd()
+    reactFiles = findFiles(projectRoot);
   }
 
   console.log(`📁 Found ${reactFiles.length} React/TS files to scan`);
@@ -275,7 +308,6 @@ const scanAndUpdateTranslations = async (filesToScan = null) => {
   const newKeys = new Set();
   let ignoredCount = 0;
   let filesProcessed = 0;
-  const flattenedExisting = flattenObject(existingTranslations);
 
   reactFiles.forEach((file) => {
     try {
@@ -296,7 +328,11 @@ const scanAndUpdateTranslations = async (filesToScan = null) => {
             continue;
           }
 
-          if (!flattenedExisting[key]) newKeys.add(key);
+          // FIXED: Check against ALL existing translations, not just current file
+          if (!allExistingTranslations[key]) {
+            newKeys.add(key);
+            console.log(`🆕 New key found: "${key}"`);
+          }
         }
         pattern.lastIndex = 0;
       });
@@ -308,16 +344,29 @@ const scanAndUpdateTranslations = async (filesToScan = null) => {
   });
 
   // ---------------- Find unused keys ----------------
-  const existingKeys = new Set(Object.keys(flattenedExisting));
+  // FIXED: Only check unused keys in the current file for file-based structure
+  const currentFileFlattened = flattenObject(existingTranslations);
+  const existingKeysInCurrentFile = new Set(Object.keys(currentFileFlattened));
   const usedKeys = new Set([...allFoundKeys, ...Array.from(ignoredKeys)]);
-  const unusedKeys = new Set(
-    [...existingKeys].filter((key) => !usedKeys.has(key))
-  );
 
-  console.log(`🔍 Found ${unusedKeys.size} unused translation keys`);
+  let unusedKeys;
+  if (isFileBased) {
+    // For file-based: only remove unused keys from current file
+    unusedKeys = new Set(
+      [...existingKeysInCurrentFile].filter((key) => !usedKeys.has(key))
+    );
+    console.log(`🔍 Found ${unusedKeys.size} unused keys in current file (${currentFile}.js)`);
+  } else {
+    // For single file: check all keys
+    const allExistingKeys = new Set(Object.keys(allExistingTranslations));
+    unusedKeys = new Set(
+      [...allExistingKeys].filter((key) => !usedKeys.has(key))
+    );
+    console.log(`🔍 Found ${unusedKeys.size} unused translation keys`);
+  }
 
   if (unusedKeys.size > 0) {
-    console.log(`🗑️  Unused keys to be removed:`);
+    console.log(`🗑️  Unused keys to be removed from ${isFileBased ? `${currentFile}.js` : 'translation file'}:`);
     unusedKeys.forEach((key) => {
       console.log(`   - ${key}`);
     });
@@ -388,13 +437,17 @@ const scanAndUpdateTranslations = async (filesToScan = null) => {
     console.log(`🚫 Keys ignored: ${ignoredCount}`);
     console.log(`🛡️ Active translations preserved!`);
 
+    if (isFileBased) {
+      console.log(`📁 Keys checked across all translation files to prevent duplicates`);
+    }
+
     if (newKeys.size > 0 || unusedKeys.size > 0) {
       console.log(`\n📝 Changes Summary:`);
       if (newKeys.size > 0) {
-        console.log(`   Added ${newKeys.size} new translation keys`);
+        console.log(`   Added ${newKeys.size} new translation keys to ${isFileBased ? `${currentFile}.js` : 'translation file'}`);
       }
       if (unusedKeys.size > 0) {
-        console.log(`   Removed ${unusedKeys.size} unused translation keys`);
+        console.log(`   Removed ${unusedKeys.size} unused translation keys from ${isFileBased ? `${currentFile}.js` : 'translation file'}`);
       }
     }
   } catch (error) {
@@ -440,6 +493,8 @@ const wrapPlainTextWithTranslation = async () => {
 
   const projectRoot = process.cwd();
   const backupDir = path.join(projectRoot, ".auto-translation-backup");
+
+  const currentMode = getCurrentMode();
 
   // Get ignored keys
   const ignoredKeys = getIgnoredKeys();
@@ -500,15 +555,45 @@ const wrapPlainTextWithTranslation = async () => {
   }
 
   if (!fs.existsSync(hooksFile)) {
-    fs.writeFileSync(
-      hooksFile,
-      `// Auto-generated hook wrapper
+    if (currentMode === 'react') {
+      fs.writeFileSync(
+        hooksFile,
+        `// Auto-generated hook wrapper
 import { useTranslation } from "react-i18next";
 
 export { useTranslation };
 `
-    );
-    console.log("📝 Created libs/hooks/index.tsx");
+      );
+    }
+    else {
+      fs.writeFileSync(hooksFile, `
+import * as Localization from "expo-localization";
+import { I18n } from "i18n-js";
+import { useMemo } from "react";
+
+/// setup path if not setted right
+import  en  from "../../i18n/localization/en.json";
+
+// Create a single i18n instance (avoid re-creating on each render)
+const i18n = new I18n({ en });
+i18n.enableFallback = true;
+
+const useTranslation = () => {
+  const locale = Localization.locale;
+
+  return useMemo(() => {
+    i18n.locale = locale;
+    return {
+      t: (key: string, options?: any) => i18n.t(key, options),
+      locale,
+    };
+  }, [locale]);
+};
+
+export default useTranslation;
+`)
+      console.log("📝 Created libs/hooks/index.tsx");
+    }
   }
 
   const reactFiles = findFiles(projectRoot);
@@ -546,7 +631,7 @@ export { useTranslation };
       );
 
       if (!hasCustomImport) {
-        content = `import { useTranslation } from "@/libs/hooks";\n` + content;
+        content = `import { useTranslation } from "@/libs/hooks"    // adjust your path;\n` + content;
         console.log("  ➕ Updated import to @/libs/hooks");
       }
 
