@@ -1,0 +1,7 @@
+{
+  "ignoredKeys": [
+    "button.cancel",
+    "header.welcome",
+    "footer.text"
+  ]
+}

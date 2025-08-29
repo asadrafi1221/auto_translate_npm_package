@@ -3,6 +3,7 @@
 
 const readline = require("readline");
 const { execSync } = require("child_process");
+const { getCurrentMode } = require("./handle.mode.js");
 
 
 
@@ -13,14 +14,17 @@ const askQuestion = (query) => {
       output: process.stdout,
     });
     rl.question(query, (answer) => {
-      rl.close(); 
+      rl.close();
       resolve(answer.trim());
     });
   });
 };
 
+
 const installDependencies = async () => {
   console.log("\n📦 Installing dependencies...\n");
+
+  const currentMode = getCurrentMode(); 
 
   // Ask user for package manager preference
   console.log("Which package manager would you like to use?");
@@ -34,10 +38,16 @@ const installDependencies = async () => {
 
   if (choice === "2") {
     packageManager = "yarn";
-    installCommand = "yarn add i18next react-i18next";
+    installCommand =
+      currentMode === "react"
+        ? "yarn add i18next react-i18next"
+        : "yarn add i18n-js expo-localization";
   } else {
     packageManager = "npm";
-    installCommand = "npm install i18next react-i18next";
+    installCommand =
+      currentMode === "react"
+        ? "npm install i18next react-i18next"
+        : "npm install i18n-js expo-localization";
   }
 
   console.log(`\n🚀 Running: ${installCommand}\n`);
@@ -64,7 +74,8 @@ const installDependencies = async () => {
   }
 };
 
+
 module.exports = {
-   askQuestion,
-   installDependencies
+  askQuestion,
+  installDependencies
 }
