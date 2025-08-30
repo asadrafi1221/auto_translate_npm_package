@@ -15,7 +15,7 @@ async function starter() {
       message: "Select project mode to ignite:",
       choices: [
         { name: "🔥 React (availible)", value: "ignite-react" },
-        { name: "📱 React Native (upcoming)  ", value: "ignite-rn" },
+        { name: "📱 React Native (availible)  ", value: "ignite-rn" },
         { name: "⚙️ Node / Backend (upcoming) ", value: "ignite-node" },
       ],
     },

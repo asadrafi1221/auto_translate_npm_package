@@ -1,3 +1,5 @@
 node_modules
 .env
 flow.README.md
+i18n
+libs

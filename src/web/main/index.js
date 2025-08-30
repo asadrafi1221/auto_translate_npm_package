@@ -20,7 +20,6 @@ const reactMain = async (commandToRun) => {
   console.log(`\n🚀 Running command: ${command}\n`);
 
   const currentMode = getCurrentMode();
-  console.log(`i am ${currentMode}`)
   try {
     switch (command) {
       //

@@ -150,7 +150,6 @@ const askModeMenu = async (currentMode, strictLocked) => {
 };
 
 const runByMode = (mode, command) => {
-  console.log("hehhe i am ", command);
 
   const modeActions = {
     react: () => reactMain(command),
@@ -206,7 +205,6 @@ const handleStrictCommands = (command, currentMode, strictLocked) => {
 };
 
 const handleModeCommands = (command, currentMode, strictLocked) => {
-  console.log("hehhe i am ", command);
 
   const commandModeMap = {
     react: { commands: REACT_MODE_COMMANDS, action: () => reactMain(command) },
