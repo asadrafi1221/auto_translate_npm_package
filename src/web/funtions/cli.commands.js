@@ -6,7 +6,7 @@ const { execSync } = require("child_process");
 const { getCurrentMode } = require("./handle.mode.js");
 
 
-
+/// this file is all for cli commands mean commands that deal wiht user interaction
 const askQuestion = (query) => {
   return new Promise((resolve) => {
     const rl = readline.createInterface({

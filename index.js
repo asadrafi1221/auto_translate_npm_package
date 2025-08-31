@@ -3,6 +3,7 @@
 const { getActualCommand, getMode, isStrictLocked, handleSpecialCommands, initializeMode, handleStrictCommands, askModeMenu, handleMenuAction, shouldAutoPrefix, handleModeCommands, runByMode, showUnknownCommandHelp } = require("./src/global/functions/mode.handle.js");
 
 
+//// its main entry of this npm package in which mode selection etc all goes ! 
 const main = async () => {
   const allArgs = process.argv.slice(2);
   const command = getActualCommand(allArgs);

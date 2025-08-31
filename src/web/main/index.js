@@ -13,6 +13,7 @@ const {
   selectFilesToScan,
 } = require("../funtions/index.js");
 
+//// its for handling user commands for react and react-native both  
 const reactMain = async (commandToRun) => {
   const args = commandToRun ? [commandToRun] : process.argv.slice(2);
   const command = args[0];
