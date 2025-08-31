@@ -18,7 +18,6 @@ const reactMain = async (commandToRun) => {
   const args = commandToRun ? [commandToRun] : process.argv.slice(2);
   const command = args[0];
 
-  console.log(`\n🚀 Running command: ${command}\n`);
 
   const currentMode = getCurrentMode();
   try {
